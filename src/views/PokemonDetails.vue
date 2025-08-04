@@ -89,13 +89,18 @@ export default {
   watch: {
     notification(newValue) {
       if (newValue) {
-        const toastLiveExample = document.getElementById('liveToast');
-        const toast = new Toast(toastLiveExample);
-        toast.show();
-        setTimeout(() => {
-          toast.hide();
-          this.pokemonStore.clearNotification();
-        }, 3000);
+        // Use nextTick to ensure DOM is updated
+        this.$nextTick(() => {
+          const toastElement = document.getElementById('liveToast')
+          if (toastElement) {
+            const toast = new Toast(toastElement)
+            toast.show()
+            setTimeout(() => {
+              toast.hide()
+              this.pokemonStore.clearNotification()
+            }, 3000)
+          }
+        })
       }
     }
   },
@@ -103,6 +108,8 @@ export default {
     const pokemonId = this.$route.params.id
     if (this.pokemon && this.pokemon.id == pokemonId) {
       this.loading = false
+      // Check for notification after component is mounted
+      this.checkAndShowNotification()
       return
     }
     const apiUrl = `https://pokeapi.co/api/v2/pokemon/${pokemonId}`
@@ -123,16 +130,31 @@ export default {
 
     const minLoadingTime = new Promise(resolve => setTimeout(resolve, 1000))
 
-    // We run the fetch and the timer concurrently
     await Promise.all([fetchPokemon(), minLoadingTime])
-
-    // We always stop loading, regardless of whether the fetch succeeded or failed.
-    // The template will then decide whether to show the content or an error message.
     this.loading = false
+
+    // Check for notification after loading is complete
+    this.checkAndShowNotification()
   },
   methods: {
     getPokemonImage(id) {
       return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`
+    },
+    checkAndShowNotification() {
+      // Check if there's a notification to show when component is ready
+      if (this.notification) {
+        this.$nextTick(() => {
+          const toastElement = document.getElementById('liveToast')
+          if (toastElement) {
+            const toast = new Toast(toastElement)
+            toast.show()
+            setTimeout(() => {
+              toast.hide()
+              this.pokemonStore.clearNotification()
+            }, 3000)
+          }
+        })
+      }
     }
   }
 }

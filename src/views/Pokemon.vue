@@ -56,8 +56,7 @@ export default {
     },
     methods: {
         async fetchAllPokemons() {
-            // Fetching a large list of Pokémon. The PokeAPI has a total of 1302 as of now.
-            // Let's fetch a reasonable large number for this example.
+            // Fetching a large list of Pokémon.
             const apiUrl = `${import.meta.env.VITE_API_URL}pokemon?limit=1000`
             try {
                 const response = await fetch(apiUrl)

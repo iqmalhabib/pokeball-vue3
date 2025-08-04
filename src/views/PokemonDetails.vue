@@ -7,6 +7,18 @@
     </div>
 
     <div class="container mt-4 mb-4" v-if="pokemon && !loading && !error">
+      <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="liveToast" class="toast" :class="{ 'show': notification }" role="alert" aria-live="assertive"
+          aria-atomic="true">
+          <div class="toast-header">
+            <strong class="me-auto">Notification</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div class="toast-body">
+            {{ notification }}
+          </div>
+        </div>
+      </div>
       <div class="card">
         <div class="row g-0">
           <div class="col-md-4">
@@ -48,16 +60,17 @@
 </template>
 
 <script>
-import { usePokemonStore } from '@/stores/pokemon';
-import LoadingSpinner from '@/components/LoadingSpinner.vue';
+import { usePokemonStore } from '@/stores/pokemon'
+import LoadingSpinner from '@/components/LoadingSpinner.vue'
+import { Toast } from 'bootstrap'
 
 export default {
   components: {
     LoadingSpinner,
   },
   setup() {
-    const pokemonStore = usePokemonStore();
-    return { pokemonStore };
+    const pokemonStore = usePokemonStore()
+    return { pokemonStore }
   },
   data() {
     return {
@@ -67,43 +80,59 @@ export default {
   },
   computed: {
     pokemon() {
-      return this.pokemonStore.pokemon;
+      return this.pokemonStore.pokemon
+    },
+    notification() {
+      return this.pokemonStore.notification
+    }
+  },
+  watch: {
+    notification(newValue) {
+      if (newValue) {
+        const toastLiveExample = document.getElementById('liveToast');
+        const toast = new Toast(toastLiveExample);
+        toast.show();
+        setTimeout(() => {
+          toast.hide();
+          this.pokemonStore.clearNotification();
+        }, 3000);
+      }
     }
   },
   async mounted() {
-    const pokemonId = this.$route.params.id;
+    const pokemonId = this.$route.params.id
     if (this.pokemon && this.pokemon.id == pokemonId) {
-        this.loading = false;
-        return;
+      this.loading = false
+      return
     }
-    const apiUrl = `https://pokeapi.co/api/v2/pokemon/${pokemonId}`;
+    const apiUrl = `https://pokeapi.co/api/v2/pokemon/${pokemonId}`
 
     const fetchPokemon = async () => {
       try {
-        const response = await fetch(apiUrl);
+        const response = await fetch(apiUrl)
         if (!response.ok) {
-          throw new Error('Network response was not ok');
+          throw new Error('Network response was not ok')
         }
-        const pokemonData = await response.json();
-        this.pokemonStore.setPokemon(pokemonData);
+        const pokemonData = await response.json()
+        this.pokemonStore.setPokemon(pokemonData)
       } catch (err) {
-        this.error = err;
-        console.error('Error fetching Pokémon details:', err);
+        this.error = err
+        console.error('Error fetching Pokémon details:', err)
       }
-    };
+    }
 
-    const minLoadingTime = new Promise(resolve => setTimeout(resolve, 1000));
+    const minLoadingTime = new Promise(resolve => setTimeout(resolve, 1000))
 
     // We run the fetch and the timer concurrently
-    await Promise.all([fetchPokemon(), minLoadingTime]);
-    
+    await Promise.all([fetchPokemon(), minLoadingTime])
+
     // We always stop loading, regardless of whether the fetch succeeded or failed.
     // The template will then decide whether to show the content or an error message.
-    this.loading = false;
+    this.loading = false
   },
   methods: {
     getPokemonImage(id) {
-      return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+      return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`
     }
   }
 }

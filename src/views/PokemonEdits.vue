@@ -91,9 +91,7 @@ export default {
       return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
     },
     saveChanges() {
-      // Here you would typically dispatch an action to your Pinia store to save the changes
-      // For this example, we'll just log the updated pokemon object
-      console.log('Updated Pokemon:', this.pokemon);
+      this.pokemonStore.setNotification(`${this.pokemon.name} has been updated.`);
       this.$router.push(`/pokemon/${this.pokemon.id}`);
     }
   }

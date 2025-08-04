@@ -14,31 +14,23 @@
           </div>
           <div class="col-md-8">
             <div class="card-body">
-              <h5 class="card-title text-capitalize">{{ pokemon.name }}</h5>
-              <p class="card-text">Height: {{ pokemon.height }}</p>
-              <p class="card-text">Weight: {{ pokemon.weight }}</p>
-              <p class="card-text">Base Experience: {{ pokemon.base_experience }}</p>
-              <p class="card-text" v-for="(ability, index) in pokemon.abilities" :key="index">
-                Ability {{ index + 1 }}: {{ ability.ability.name }}
-              </p>
-              <p class="card-text" v-for="(type, index) in pokemon.types" :key="index">
-                Type {{ index + 1 }}: {{ type.type.name }}
-              </p>
-              <hr>
-              <h6>Stats:</h6>
-              <ul>
-                <li v-for="(stat, index) in pokemon.stats" :key="index">
-                  {{ stat.stat.name }}: {{ stat.base_stat }}
-                </li>
-              </ul>
-              <hr>
-              <h6>Moves:</h6>
-              <ul>
-                <li v-for="(move, index) in pokemon.moves.slice(0, 5)" :key="index">
-                  {{ move.move.name }}
-                </li>
-              </ul>
-              <router-link :to="'/pokemon/edit/' + pokemon.id" class="btn btn-primary mt-3">Edit</router-link>
+              <div class="mb-3">
+                <label for="pokemonName" class="form-label">Name</label>
+                <input type="text" class="form-control" id="pokemonName" v-model="pokemon.name">
+              </div>
+              <div class="mb-3">
+                <label for="pokemonHeight" class="form-label">Height</label>
+                <input type="number" class="form-control" id="pokemonHeight" v-model="pokemon.height">
+              </div>
+              <div class="mb-3">
+                <label for="pokemonWeight" class="form-label">Weight</label>
+                <input type="number" class="form-control" id="pokemonWeight" v-model="pokemon.weight">
+              </div>
+              <div class="mb-3">
+                <label for="pokemonBaseExperience" class="form-label">Base Experience</label>
+                <input type="number" class="form-control" id="pokemonBaseExperience" v-model="pokemon.base_experience">
+              </div>
+              <button @click="saveChanges" class="btn btn-primary">Save</button>
             </div>
           </div>
         </div>
@@ -72,10 +64,6 @@ export default {
   },
   async mounted() {
     const pokemonId = this.$route.params.id;
-    if (this.pokemon && this.pokemon.id == pokemonId) {
-        this.loading = false;
-        return;
-    }
     const apiUrl = `https://pokeapi.co/api/v2/pokemon/${pokemonId}`;
 
     const fetchPokemon = async () => {
@@ -94,16 +82,19 @@ export default {
 
     const minLoadingTime = new Promise(resolve => setTimeout(resolve, 1000));
 
-    // We run the fetch and the timer concurrently
     await Promise.all([fetchPokemon(), minLoadingTime]);
     
-    // We always stop loading, regardless of whether the fetch succeeded or failed.
-    // The template will then decide whether to show the content or an error message.
     this.loading = false;
   },
   methods: {
     getPokemonImage(id) {
       return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+    },
+    saveChanges() {
+      // Here you would typically dispatch an action to your Pinia store to save the changes
+      // For this example, we'll just log the updated pokemon object
+      console.log('Updated Pokemon:', this.pokemon);
+      this.$router.push(`/pokemon/${this.pokemon.id}`);
     }
   }
 }
